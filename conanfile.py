@@ -57,9 +57,9 @@ class LibPcapConan(ConanFile):
             if info.linux_distro in ("centos"):
                 arch = ".i386" if self._is_amd64_to_i386() else ""
                 if self.options.enable_dbus:
-                    raise "dbus not supported for CentOS recipe"
+                    package_list.append("dbus-glib-devel%s" % arhc)
                 if self.options.enable_bluetooth:
-                    raise "bluetooth not supported for CentOS recipe"
+                    package_list.append("bluez-libs-devel%s" % arch)
                 if self.options.enable_packet_ring:
                     package_list.append("libnl3-devel%s" % arch)
             if package_list:
