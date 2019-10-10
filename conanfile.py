@@ -1,6 +1,7 @@
 """Conan.io recipe for pcap library
 """
 from conans import AutoToolsBuildEnvironment, tools, ConanFile
+from conans.tools import OSInfo
 
 
 class LibPcapConan(ConanFile):
@@ -43,14 +44,24 @@ class LibPcapConan(ConanFile):
 
     def system_requirements(self):
         if self.settings.os == "Linux":
-            arch = ":i386" if self._is_amd64_to_i386() else ""
             package_list = []
-            if self.options.enable_dbus:
-                package_list.extend(["libdbus-glib-1-dev%s" % arch, "libdbus-1-dev"])
-            if self.options.enable_bluetooth:
-                package_list.append("libbluetooth-dev%s" % arch)
-            if self.options.enable_packet_ring:
-                package_list.append("libnl-genl-3-dev%s" % arch)
+            info = OSInfo()
+            if info.linux_distro in ("debian", "ubuntu"):
+                arch = ":i386" if self._is_amd64_to_i386() else ""
+                if self.options.enable_dbus:
+                    package_list.extend(["libdbus-glib-1-dev%s" % arch, "libdbus-1-dev"])
+                if self.options.enable_bluetooth:
+                    package_list.append("libbluetooth-dev%s" % arch)
+                if self.options.enable_packet_ring:
+                    package_list.append("libnl-genl-3-dev%s" % arch)
+            if info.linux_distro in ("centos"):
+                arch = ".i386" if self._is_amd64_to_i386() else ""
+                if self.options.enable_dbus:
+                    raise "dbus not supported for CentOS recipe"
+                if self.options.enable_bluetooth:
+                    raise "bluetooth not supported for CentOS recipe"
+                if self.options.enable_packet_ring:
+                    package_list.append("libnl3-devel%s" % arch)
             if package_list:
                 package_tool = tools.SystemPackageTool()
                 package_tool.install(packages=" ".join(package_list))
